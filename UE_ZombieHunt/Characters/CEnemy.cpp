@@ -30,7 +30,7 @@ ACEnemy::ACEnemy()
 	GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 
 	USkeletalMesh* mesh;
-	CHelpers::GetAsset<USkeletalMesh>(&mesh, "SkeletalMesh'/Game/ActionGame/Character/Mesh/SK_Mannequin.SK_Mannequin'");
+	CHelpers::GetAsset<USkeletalMesh>(&mesh, "SkeletalMesh'/Game/ActionGame/Character/Mannequin/Mesh/SK_Mannequin.SK_Mannequin'");
 	GetMesh()->SetSkeletalMesh(mesh);
 
 	TSubclassOf<UAnimInstance> animInstance;
@@ -135,7 +135,15 @@ void ACEnemy::Hitted()
 void ACEnemy::Dead()
 {
 	CheckFalse(State->IsDeadMode());
-	Montages->PlayDead();
+	//Montages->PlayDead();
+
+	Action->OffAllCollisions();
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+
 }
 
 /*

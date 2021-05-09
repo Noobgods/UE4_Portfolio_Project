@@ -30,7 +30,8 @@ ACDoAction_Rifle::ACDoAction_Rifle()
 	CHelpers::GetAsset<UParticleSystem>(&ImpactParticle, "ParticleSystem'/Game/ActionGame/Particles/VFX_Impact_Default.VFX_Impact_Default'");
 	
 	CHelpers::GetAsset<USoundCue>(&FireSoundCue, "SoundCue'/Game/ActionGame/Sounds/S_RifleShoot_Cue.S_RifleShoot_Cue'");
-
+	CHelpers::GetAsset<USoundCue>(&EmptySoundCue, "SoundCue'/Game/ActionGame/Sounds/Empty_Gun_Sound_Cue.Empty_Gun_Sound_Cue'");
+	
 	//ÅºÈç µ¥Ä®
 	CHelpers::GetAsset<UMaterialInstanceConstant>(&DecalMaterial, "MaterialInstanceConstant'/Game/ActionGame/Materials/MI_Decal.MI_Decal'");
 
@@ -47,11 +48,13 @@ void ACDoAction_Rifle::BeginPlay()
 	Aim->BeginPlay(OwnerCharacter);
 
 	ACPlayer* player = Cast<ACPlayer>(OwnerCharacter);
+
 	if (!!player) {
 		CrossHair = CreateWidget<UCUserWidget_Reticle, APlayerController>(player->GetController<APlayerController>(), CrossHairClass);
 		CrossHair->AddToViewport();
 		CrossHair->SetVisibility(ESlateVisibility::Hidden);
 		CrossHair->SetSpreadSpeed(SpreadSpeed);
+		CrossHair->SetReduceSpeed(ReduceSpeed);
 		CrossHair->SetMinSpread(MinSpread);
 		CrossHair->SetMaxSpread(MaxSpread);
 	}
@@ -110,6 +113,7 @@ void ACDoAction_Rifle::DoAction()
 
 void ACDoAction_Rifle::EndAction()
 {
+	CheckFalse(bFiring);
 	bFiring = false;
 
 	State->SetIdleMode();
@@ -151,7 +155,6 @@ void ACDoAction_Rifle::Begin_DoAction()
 void ACDoAction_Rifle::End_DoAction()
 {
 	Super::End_DoAction();
-	bReloading = false;
 	
 	//Ammo Update
 	ACPlayer* player = Cast<ACPlayer>(OwnerCharacter);
@@ -169,6 +172,7 @@ void ACDoAction_Rifle::End_DoAction()
 	}
 	player->UpdateAmmo(CurrentAmmo);
 
+	bReloading = false;
 	State->SetIdleMode();
 }
 
@@ -177,6 +181,7 @@ void ACDoAction_Rifle::Reload()
 	//Ammo Check
 	ACPlayer* player = Cast<ACPlayer>(OwnerCharacter);
 	if (player->GetCurrentAmmo() <= 0) return;
+	if (CurrentAmmo == MaxAmmo) return;
 
 	OwnerCharacter->PlayAnimMontage(ReloadMontage, PlayRatio, StartSection);
 }
@@ -184,15 +189,22 @@ void ACDoAction_Rifle::Reload()
 void ACDoAction_Rifle::Firing()
 {
 	CheckTrue(bReloading);
-	if (CurrentAmmo <= 0) {
-		Reload();
-		return;
-	}
 	//--------------------------------------------------------------------------
 	//Get Rifle Owner
 	//--------------------------------------------------------------------------
 	IICharacter* rifleCharacter = Cast<IICharacter>(OwnerCharacter);
 	CheckNull(rifleCharacter);
+
+	//--------------------------------------------------------------------------
+	//Empty Ammo Check
+	//--------------------------------------------------------------------------
+	Mesh = rifleCharacter->GetAttachment()->GetMesh();
+	if (CurrentAmmo <= 0) {
+		FVector EjectLocation = Mesh->GetSocketLocation("EjectBullet");
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), EmptySoundCue, EjectLocation);
+		EndAction();
+		return;
+	}
 
 	//--------------------------------------------------------------------------
 	//Get Aim Ray
@@ -207,25 +219,25 @@ void ACDoAction_Rifle::Firing()
 	}
 
 	//--------------------------------------------------------------------------
-	//Play CameraShake
+	//Set Etc
+	//--------------------------------------------------------------------------
+	CrossHair->UpdateWidget(true, 1.0f);
+	CurrentAmmo--;
+
+	//--------------------------------------------------------------------------
+	//Player Setting
 	//--------------------------------------------------------------------------
 	ACPlayer* player = Cast<ACPlayer>(OwnerCharacter);
 	if (!!player) {
 		APlayerController* controller = player->GetController<APlayerController>();
 		controller->PlayerCameraManager->PlayCameraShake(CameraShakeClass);
-	}
 
-	//--------------------------------------------------------------------------
-	//Set Etc
-	//--------------------------------------------------------------------------
-	CrossHair->UpdateWidget(true, 1.0f);
-	CurrentAmmo--;
-	player->UpdateAmmo(CurrentAmmo);
+		player->UpdateAmmo(CurrentAmmo);
+	}
 
 	//--------------------------------------------------------------------------
 	//Spawn Bullet
 	////------------------------------------------------------------------------
-	Mesh = player->GetAttachment()->GetMesh();
 	FVector muzzleLocation = Mesh->GetSocketLocation("MuzzleFlash");
 	
 	if (!!BulletClass) {
@@ -275,6 +287,13 @@ void ACDoAction_Rifle::Firing()
 
 				FPointDamageEvent pde;
 				UGameplayStatics::ApplyPointDamage(hitCharacter, Datas[0].Power, direction[i], hitResult, OwnerCharacter->GetController(), this, nullptr);
+				
+				USkeletalMeshComponent* meshComp = CHelpers::GetComponent<USkeletalMeshComponent>(hitResult.GetActor());
+				
+				if (meshComp->IsSimulatingPhysics()) {
+					direction[i].Normalize();
+					meshComp->AddImpulseAtLocation(direction[i] * Datas[0].Power * 3.0f, OwnerCharacter->GetActorLocation());
+				}
 			}
 			else {
 				//Render Decal
@@ -312,7 +331,7 @@ void ACDoAction_Rifle::Firing()
 						direction[i] = staticMeshActor->GetActorLocation() - OwnerCharacter->GetActorLocation();
 						direction[i].Normalize();
 
-						meshComp->AddImpulseAtLocation(direction[i] * 3000.0f, OwnerCharacter->GetActorLocation());
+						meshComp->AddImpulseAtLocation(direction[i] * 3.0f, OwnerCharacter->GetActorLocation());
 					}
 				}
 			}

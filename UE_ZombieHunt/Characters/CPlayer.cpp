@@ -2,12 +2,12 @@
 #include "Global.h"
 #include "Actions/CActionData.h"
 #include "Actions/CDoAction_Rifle.h"
-#include "Items/CItem.h"
 #include "Components/CStatusComponent.h"
 #include "Components/COptionComponent.h"
 #include "Components/CMontagesComponent.h"
 #include "Components/CActionComponent.h"
 #include "Components/CInventoryComponent.h"
+#include "Items/CItem.h"
 #include "Widgets/CUserWidget_Ammo.h"
 
 #include "Camera/CameraComponent.h"
@@ -15,6 +15,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialInstanceDynamic.h"
+
+//Temp
+#include "Actors/CItemSpawner.h"
+//Temp
 
 ACPlayer::ACPlayer()
 {
@@ -43,7 +47,7 @@ ACPlayer::ACPlayer()
 	GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 
 	USkeletalMesh* mesh;
-	CHelpers::GetAsset<USkeletalMesh>(&mesh, "SkeletalMesh'/Game/OpenWorldGame/Character/Paladin/paladin.paladin'");
+	CHelpers::GetAsset<USkeletalMesh>(&mesh, "SkeletalMesh'/Game/ActionGame/Character/Paladin/paladin.paladin'");
 	GetMesh()->SetSkeletalMesh(mesh);
 
 	TSubclassOf<UAnimInstance> animInstance;
@@ -61,7 +65,7 @@ ACPlayer::ACPlayer()
 	//SpringArm->bEnableCameraLag = true;
 
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->MaxWalkSpeed = Status->GetSprintSpeed();
+	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
@@ -91,13 +95,24 @@ void ACPlayer::BeginPlay()
 	WidgetAmmo->SetVisibility(ESlateVisibility::Hidden);
 	
 	//Temp
-	Inventory->GetInitItems();
+	//Inventory->GetInitItems();
 	//Temp
 }
 
 void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	CLog::Print(bPushForward, 1);
+	CLog::Print(bPushSprint, 2);
+
+	FVector start = GetActorLocation();
+	FVector end = GetActorLocation() + FVector(20, 0, 20);
+	TArray<TEnumAsByte<EObjectTypeQuery>> type;
+	type.Add(EObjectTypeQuery::ObjectTypeQuery7);
+	TArray<AActor*> ignore;
+	ignore.Add(this);
+	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), start, end, 100.0f, type, true, ignore, EDrawDebugTrace::None, hitResults, true);
 
 }
 
@@ -112,8 +127,10 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	PlayerInputComponent->BindAction("Evade", EInputEvent::IE_Pressed, this, &ACPlayer::OnEvade);
 
-	PlayerInputComponent->BindAction("Walk", EInputEvent::IE_Pressed, this, &ACPlayer::OnWalk);
-	PlayerInputComponent->BindAction("Walk", EInputEvent::IE_Released, this, &ACPlayer::OffWalk);
+	PlayerInputComponent->BindAction("Forward", EInputEvent::IE_Pressed, this, &ACPlayer::PressedForward);
+	PlayerInputComponent->BindAction("Forward", EInputEvent::IE_Released, this, &ACPlayer::ReleasedForward);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ACPlayer::PressedSprint);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ACPlayer::ReleasedSprint);
 
 	PlayerInputComponent->BindAction("Fist", EInputEvent::IE_Pressed, this, &ACPlayer::OnFist);
 	PlayerInputComponent->BindAction("OneHand", EInputEvent::IE_Pressed, this, &ACPlayer::OnOneHand);
@@ -129,6 +146,11 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("AutoFire", EInputEvent::IE_Pressed, this, &ACPlayer::OnAutoFire);
 
 	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ACPlayer::OnReload);
+
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &ACPlayer::OnInteract);
+	//Temp
+	PlayerInputComponent->BindAction("TestButton", EInputEvent::IE_Pressed, this, &ACPlayer::TestButton);
+	//Temp
 }
 
 void ACPlayer::OnMoveForward(float InAxis)
@@ -155,7 +177,6 @@ void ACPlayer::OnHorizontalLook(float InAxis)
 {
 	float rate = Option->GetHorizontalLookRate();
 	AddControllerYawInput(InAxis * rate * GetWorld()->GetDeltaSeconds());
-
 }
 
 void ACPlayer::OnVerticalLook(float InAxis)
@@ -164,14 +185,45 @@ void ACPlayer::OnVerticalLook(float InAxis)
 	AddControllerPitchInput(InAxis * rate * GetWorld()->GetDeltaSeconds());
 }
 
-void ACPlayer::OnWalk()
-{
-	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
+void ACPlayer::PressedForward() {
+	bPushForward = true;
+	if (bPushForward && bPushSprint)
+		OnSprint();
 }
 
-void ACPlayer::OffWalk()
+void ACPlayer::ReleasedForward() {
+	bPushForward = false;
+	if (!(bPushForward && bPushSprint))
+		OffSprint();
+}
+
+void ACPlayer::PressedSprint()
 {
+	bPushSprint = true;
+	if (bPushForward && bPushSprint)
+		OnSprint();
+}
+
+void ACPlayer::ReleasedSprint()
+{
+	bPushSprint = false;
+	if (!(bPushForward && bPushSprint))
+		OffSprint();
+}
+
+void ACPlayer::OnSprint()
+{
+	CheckFalse(State->IsIdleMode());
+	CheckTrue(bRightClick);
+
+	bSprintMode = true;
 	GetCharacterMovement()->MaxWalkSpeed = Status->GetSprintSpeed();
+}
+
+void ACPlayer::OffSprint()
+{
+	bSprintMode = false;
+	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
 }
 
 void ACPlayer::OnEvade()
@@ -179,12 +231,12 @@ void ACPlayer::OnEvade()
 	CheckFalse(State->IsIdleMode());
 	CheckFalse(Status->CanMove());
 
+	/*
 	if (InputComponent->GetAxisValue("MoveForward") < 0.0f) {
 		State->SetBackStepMode();
-
 		return;
 	}
-
+	*/
 	State->SetRollMode();
 }
 
@@ -230,7 +282,7 @@ void ACPlayer::End_Roll()
 void ACPlayer::OnFist()
 {
 	if (bRightClick) return;
-	CheckFalse(State->IsIdleMode());
+	if (bSprintMode) OffSprint();
 
 	// ³ªÁß¿¡ Fist À§Á¬ µé¾î¿È
 	if (Action->SetFistMode()) {
@@ -245,6 +297,7 @@ void ACPlayer::OnFist()
 void ACPlayer::OnOneHand()
 {
 	if (bRightClick) return;
+	if (bSprintMode) OffSprint();
 	CheckFalse(State->IsIdleMode());
 
 	// ³ªÁß¿¡ OneHandWidget µé¾î¿È
@@ -260,16 +313,13 @@ void ACPlayer::OnOneHand()
 void ACPlayer::OnRifle()
 {
 	if (bRightClick) return;
+	if (bSprintMode) OffSprint();
 	CheckFalse(State->IsIdleMode());
 
 	if (Action->SetRifleMode()) {
 		WidgetAmmo->SetVisibility(ESlateVisibility::Visible);
 
-		ACDoAction_Rifle* rifle = Cast<ACDoAction_Rifle>(Action->GetCurrent()->GetDoAction());
-		if (!!rifle) {
-			SelectAmmo = Inventory->SearchItemByName("RifleAmmo");
-			UpdateAmmo(rifle->GetCurrentAmmo());
-		}
+		AmmoSelect();
 	}
 	else {
 		SelectAmmo = nullptr;
@@ -280,16 +330,13 @@ void ACPlayer::OnRifle()
 void ACPlayer::OnShotgun()
 {
 	if (bRightClick) return;
+	if (bSprintMode) OffSprint();
 	CheckFalse(State->IsIdleMode());
 
 	if (Action->SetShotgunMode()) {
 		WidgetAmmo->SetVisibility(ESlateVisibility::Visible);
 
-		ACDoAction_Rifle* shotgun = Cast<ACDoAction_Rifle>(Action->GetCurrent()->GetDoAction());
-		if (!!shotgun) {
-			SelectAmmo = Inventory->SearchItemByName("ShotgunAmmo");
-			UpdateAmmo(shotgun->GetCurrentAmmo());
-		}
+		AmmoSelect();
 	}
 	else {
 		SelectAmmo = nullptr;
@@ -315,11 +362,26 @@ void ACPlayer::OnAutoFire() {
 }
 
 void ACPlayer::OnReload() {
+	CheckFalse(State->IsIdleMode());
 	ACDoAction_Rifle* rifle = Cast<ACDoAction_Rifle>(Action->GetCurrent()->GetDoAction());
 	if (!!rifle) {
+		OffSprint();
 		rifle->Reload();
 	}
 }
+
+void ACPlayer::OnInteract()
+{
+	if (hitResults.Num() > 0) {
+		ACItemActor* itemActor = Cast<ACItemActor>(hitResults[0].Actor);
+		if (!!itemActor) {
+			itemActor->GetContainer()->MoveItem(Inventory, itemActor->GetItem());
+
+			AmmoSelect();
+		}
+	}
+}
+
 
 ACAttachment* ACPlayer::GetAttachment() {
 	return Action->GetCurrent()->GetAttachment();
@@ -335,18 +397,18 @@ UCActionComponent* ACPlayer::GetActionComponent() {
 
 void ACPlayer::AddCurrentAmmo(int Amount)
 {
-	SelectAmmo->Quantity += Amount;
+	SelectAmmo->AddQuantity(Amount);
 }
 
 void ACPlayer::SetCurrentAmmo(int Amount)
 {
-	SelectAmmo->Quantity = Amount;
+	SelectAmmo->SetQuantity(Amount);
 }
 
 int32 ACPlayer::GetCurrentAmmo()
 {
 	if (!!SelectAmmo) {
-		return SelectAmmo->Quantity;
+		return SelectAmmo->GetQuantity();
 	}
 	else return NULL;
 }
@@ -369,7 +431,7 @@ void ACPlayer::OffAim()
 
 	bRightClick = false;
 	Action->OffAim();
-	GetCharacterMovement()->MaxWalkSpeed = Status->GetSprintSpeed();
+	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
 
 	ZoomOut();
 }
@@ -389,22 +451,21 @@ void ACPlayer::GetAimRay(FVector& OutAimStart, FVector& OutAimEnd, FVector& OutA
 	OutAimDirection = ConeDirection;
 }
 
-void ACPlayer::OnFocus()
-{
-	//CrossHair->OnFocus();
-}
-
-void ACPlayer::OffFocus()
-{
-	//CrossHair->OffFocus();
-}
-
 void ACPlayer::UpdateAmmo(uint32 CurrentAmmo)
 {
 	if(!!SelectAmmo)
-		WidgetAmmo->UpdateAmmo(CurrentAmmo, SelectAmmo->Quantity);
+		WidgetAmmo->UpdateAmmo(CurrentAmmo, SelectAmmo->GetQuantity());
 	else
 		WidgetAmmo->UpdateAmmo(CurrentAmmo, 0);
+}
+
+void ACPlayer::AmmoSelect()
+{
+	ACDoAction_Rifle* gun = Cast<ACDoAction_Rifle>(Action->GetCurrent()->GetDoAction());
+	if (!!gun) {
+		SelectAmmo = Inventory->SearchItemByName(gun->GetUsingAmmo());
+		UpdateAmmo(gun->GetCurrentAmmo());
+	}
 }
 
 float ACPlayer::MoveSpeedRatio()
@@ -419,3 +480,22 @@ void ACPlayer::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 	case EStateType::Roll: Begin_Roll(); break;
 	}
 }
+
+void ACPlayer::OnFocus()
+{
+	//CrossHair->OnFocus();
+}
+
+void ACPlayer::OffFocus()
+{
+	//CrossHair->OffFocus();
+}
+
+//Temp
+void ACPlayer::TestButton()
+{
+	FVector location = FVector(FMath::RandRange(-750.0f, 750.0f), FMath::RandRange(-750.0f, 750.0f), 110.0f);
+	FRotator rotator;
+	ItemSpawner->SpawnItem(TEXT("RifleAmmo"), location, rotator, 30);
+}
+//Temp

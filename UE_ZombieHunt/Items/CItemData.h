@@ -23,15 +23,22 @@ class UE_ZOMBIEHUNT_API UCItemData : public UDataAsset
 	GENERATED_BODY()
 
 private:
-	FString GetLabelName(ACharacter* InOwnerCharacter, FString InName);
+	FString GetLabelName(FString InName);
 
 public:
 	UPROPERTY(EditAnywhere)
 		TMap<int32, FItemStruct> Items;
 
 public:
-	void TakeItemsByID(UCItem** OutItem, int32 ItemID, ACharacter* OwnerCharacter);
-	void TakeItemsByName(UCItem** OutItem, FString ItemName, ACharacter* OwnerCharacter);
-	void SpawnItemsByID(UCItem** OutItem, int32 ItemID, FVector Location, FRotator Rotation);
-	void SpawnItemsByName(UCItem** OutItem, FString ItemName, FVector Location, FRotator Rotation);
+	UFUNCTION(BlueprintCallable)
+		class UCItem* TakeItemsByID(int32 ItemID, ACharacter* OwnerCharacter);
+
+	UFUNCTION(BlueprintCallable)
+		class UCItem* TakeItemsByName(FString ItemName, ACharacter* OwnerCharacter);
+
+	UFUNCTION(BlueprintCallable)
+		class UCItem* SpawnItemsByID(AActor* OwnActor, int32 ItemID, FVector Location, FRotator Rotation);
+
+	UFUNCTION(BlueprintCallable)
+		class UCItem* SpawnItemsByName(AActor* OwnActor, FString ItemName, FVector Location, FRotator Rotation);
 };

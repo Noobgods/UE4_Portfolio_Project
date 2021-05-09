@@ -31,15 +31,6 @@ class UE_ZOMBIEHUNT_API UCItem : public UObject
 	GENERATED_BODY()
 
 public:
-	friend class UCItemData;
-
-public:
-	UFUNCTION(BlueprintCallable)
-		void Pick(AActor* PickCharacter);
-
-	UFUNCTION(BlueprintCallable)
-		UCItem* Drop(int32 Amount);
-
 	UFUNCTION(BlueprintCallable)
 		void Merge(UCItem* Item);
 
@@ -47,12 +38,23 @@ public:
 		UCItem* Split(int32 Amount);
 
 public:
-	void SetQuantity(int32 Amount);
-
-	bool AddQuantity(int32& Amount);
-	bool SubQuantity(int32& Amount);
+	FORCEINLINE int32 GetQuantity() { return Quantity; }
 
 public:
+	void SetQuantity(int32 Amount);
+
+	void AddQuantity(int32 Amount);
+	void SubQuantity(int32 Amount);
+
+public:
+	FORCEINLINE FItemAttributes* GetAttribute() { return Attribute; }
+	FORCEINLINE ACItemActor* GetActorData() { return ActorData; }
+
+public:
+	void SetAttribute(FItemAttributes* InAttribute);
+	void SetActorData(ACItemActor* InActorData);
+
+private:
 	FItemAttributes* Attribute;
 	ACItemActor* ActorData;
 

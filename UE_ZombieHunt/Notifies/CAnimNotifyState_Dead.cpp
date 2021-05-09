@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CActionComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 FString UCAnimNotifyState_Dead::GetNotifyName_Implementation() const
 {
@@ -22,7 +23,8 @@ void UCAnimNotifyState_Dead::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnim
 
 	action->OffAllCollisions();
 
-	Cast<ACharacter>(MeshComp->GetOwner())->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ACharacter* character = Cast<ACharacter>(MeshComp->GetOwner());
+	character->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void UCAnimNotifyState_Dead::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)

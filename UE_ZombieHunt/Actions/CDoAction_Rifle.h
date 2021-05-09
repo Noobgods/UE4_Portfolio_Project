@@ -26,6 +26,9 @@ private:
 		int32 CurrentAmmo;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gun")
+		FString UsingAmmo = "None";
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gun")
 		bool EnableAutoFire = true;
 
 private:
@@ -48,6 +51,9 @@ private:
 		class USoundCue* FireSoundCue;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GunAssets")
+		class USoundCue* EmptySoundCue;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GunAssets")
 		class UMaterialInstanceConstant* DecalMaterial;
 
 private:
@@ -68,6 +74,9 @@ private:
 		float SpreadSpeed;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrossHair")
+		float ReduceSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrossHair")
 		float MinSpread;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrossHair")
@@ -80,14 +89,13 @@ private:
 	UPROPERTY()
 		class UCAim* Aim;
 
-	int32* UsingAmmo;
-
 public:
 	FORCEINLINE bool GetAiming() { return bAiming; }
 	FORCEINLINE bool GetFiring() { return bFiring; }
 	FORCEINLINE bool GetAutoFire() { return bAutoFire; }
 	FORCEINLINE void ToggleAutoFire() { if(EnableAutoFire) bAutoFire = !bAutoFire; }
 	FORCEINLINE int32 GetCurrentAmmo() { return CurrentAmmo; }
+	FORCEINLINE FString GetUsingAmmo() { return UsingAmmo; }
 
 public:
 	ACDoAction_Rifle();

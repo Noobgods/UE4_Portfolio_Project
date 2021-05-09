@@ -1,34 +1,100 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CBehaviorComponent.h"
+#include "Global.h"
+#include "Characters/CPlayer.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
-// Sets default values for this component's properties
-UCBehaviorComponent::UCBehaviorComponent()
+bool UCBehaviorComponent::IsWaitMode()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	return GetType() == EBehaviorType::Wait;
 }
 
+bool UCBehaviorComponent::IsApproachMode()
+{
+	return GetType() == EBehaviorType::Approach;
+}
 
-// Called when the game starts
+bool UCBehaviorComponent::IsActionMode()
+{
+	return GetType() == EBehaviorType::Action;
+}
+
+bool UCBehaviorComponent::IsPatrolMode()
+{
+	return GetType() == EBehaviorType::Patrol;
+}
+
+bool UCBehaviorComponent::IsHittedMode()
+{
+	return GetType() == EBehaviorType::Hitted;
+}
+
+bool UCBehaviorComponent::IsAvoidMode()
+{
+	return GetType() == EBehaviorType::Avoid;
+}
+
+UCBehaviorComponent::UCBehaviorComponent()
+{
+
+}
+
+void UCBehaviorComponent::SetWaitMode()
+{
+	ChangeType(EBehaviorType::Wait);
+}
+
+void UCBehaviorComponent::SetApproachMode()
+{
+	ChangeType(EBehaviorType::Approach);
+}
+
+void UCBehaviorComponent::SetActionMode()
+{
+	ChangeType(EBehaviorType::Action);
+}
+
+void UCBehaviorComponent::SetPatrolMode()
+{
+	ChangeType(EBehaviorType::Patrol);
+}
+
+void UCBehaviorComponent::SetHittedMode()
+{
+	ChangeType(EBehaviorType::Hitted);
+}
+
+void UCBehaviorComponent::SetAvoidMode()
+{
+	ChangeType(EBehaviorType::Avoid);
+}
+
+ACPlayer* UCBehaviorComponent::GetTargetPlayer()
+{
+	return Cast<ACPlayer>(Blackboard->GetValueAsObject(PlayerKey));
+}
+
+FVector UCBehaviorComponent::GetWarpLocation()
+{
+	return Blackboard->GetValueAsVector(WarpLocationKey);
+}
+
 void UCBehaviorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
 
-
-// Called every frame
-void UCBehaviorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCBehaviorComponent::ChangeType(EBehaviorType InType)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	EBehaviorType type = GetType();
+	Blackboard->SetValueAsEnum(BehaviorKey, uint8(InType));
 
-	// ...
+	if (OnBehaviorTypeChanged.IsBound()) {
+		OnBehaviorTypeChanged.Broadcast(type, InType);
+	}
 }
 
+EBehaviorType UCBehaviorComponent::GetType()
+{
+	return (EBehaviorType)Blackboard->GetValueAsEnum(BehaviorKey);
+}

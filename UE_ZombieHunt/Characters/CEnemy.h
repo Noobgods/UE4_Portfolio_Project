@@ -46,8 +46,6 @@ public:
 	virtual void OnFocus() override {};
 	virtual void OffFocus() override {};
 
-	virtual void UpdateAmmo(uint32 CurrentAmmo) {}
-
 public:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 

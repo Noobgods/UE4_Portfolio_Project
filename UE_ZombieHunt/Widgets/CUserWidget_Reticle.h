@@ -27,6 +27,7 @@ public:
 	void SetMinSpread(float Min) { MinSpread = Min; }
 	void SetMaxSpread(float Max) { MaxSpread = Max; }
 	void SetSpreadSpeed(float Speed) { SpreadSpeed = Speed;  }
+	void SetReduceSpeed(float Speed) { ReduceSpeed = Speed; }
 
 private:
 	float GetReticleMinSpread(float Scale);
@@ -41,6 +42,9 @@ protected :
 
 	UPROPERTY(BlueprintReadWrite, Category = "Reticle")
 		float SpreadSpeed;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Reticle")
+		float ReduceSpeed;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Reticle")
 		float CurrentSpread;

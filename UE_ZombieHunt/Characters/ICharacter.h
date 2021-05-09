@@ -25,8 +25,6 @@ public:
 
 	virtual void OnFocus() {}
 	virtual void OffFocus() {}
-	
-	virtual void UpdateAmmo(uint32 CurrentAmmo) {}
 
 protected:
 	virtual void Hitted() {}

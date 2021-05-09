@@ -31,11 +31,16 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	IICharacter* actionCharacter = Cast<IICharacter>(character);
 	UCActionComponent* actionCmp = Cast<UCActionComponent>(actionCharacter->GetActionComponent());
-	if (actionCmp->IsRifleMode()) {
+	if (actionCmp->IsRifleMode() || actionCmp->IsShotgunMode()) {
 		ACPlayer* player = Cast<ACPlayer>(actionCharacter);
 		if (!!player) {
+			bSprint = player->GetSprintMode();
 			bAiming = player->GetRightClick();
 		}
+	}
+	else {
+		bSprint = false;
+		bAiming = false;
 	}
 }
 

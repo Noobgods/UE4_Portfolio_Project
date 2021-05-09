@@ -1,13 +1,5 @@
 #include "CItem.h"
-
-void UCItem::Pick(AActor* PickCharacter)
-{
-}
-
-UCItem* UCItem::Drop(int32 Amount)
-{
-	return nullptr;
-}
+#include "Global.h"
 
 void UCItem::Merge(UCItem* Item)
 {
@@ -20,14 +12,26 @@ UCItem* UCItem::Split(int32 Amount)
 
 void UCItem::SetQuantity(int32 Amount)
 {
+	Quantity = Amount;
 }
 
-bool UCItem::AddQuantity(int32& Amount)
+void UCItem::AddQuantity(int32 Amount)
 {
-	return false;
+	Quantity += Amount;
 }
 
-bool UCItem::SubQuantity(int32& Amount)
+void UCItem::SubQuantity(int32 Amount)
 {
-	return false;
+	Quantity -= Amount;
+}
+
+void UCItem::SetAttribute(FItemAttributes* InAttribute) 
+{ 
+	Attribute = InAttribute; 
+}
+
+void UCItem::SetActorData(ACItemActor* InActorData) 
+{ 
+	ActorData = InActorData; 
+	ActorData->Item = this;
 }

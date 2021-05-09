@@ -41,8 +41,8 @@ void UCAim::On()
 	Hud->SetDraw();
 	Timeline.PlayFromStart();
 
-	SpringArm->TargetArmLength = 200.0;
-	SpringArm->SocketOffset = FVector(0, 30, 30);
+	//SpringArm->TargetArmLength = 200.0;
+	SpringArm->SocketOffset = FVector(0, 50, 30);
 	//SpringArm->bEnableCameraLag = false;
 
 }
@@ -57,7 +57,7 @@ void UCAim::Off()
 	Hud->SetNotDraw();
 	Timeline.ReverseFromEnd();
 
-	SpringArm->TargetArmLength = 200.0;
+	//SpringArm->TargetArmLength = 200.0;
 	SpringArm->SocketOffset = FVector(0, 70, 30);
 	//SpringArm->bEnableCameraLag = true;
 }

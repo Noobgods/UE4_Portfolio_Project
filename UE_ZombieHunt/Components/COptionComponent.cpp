@@ -2,7 +2,6 @@
 
 UCOptionComponent::UCOptionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
 
 }
 

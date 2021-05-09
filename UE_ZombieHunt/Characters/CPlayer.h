@@ -71,8 +71,12 @@ private:
 	void OnVerticalLook(float InAxis);
 
 private:
-	void OnWalk();
-	void OffWalk();
+	void PressedForward();
+	void ReleasedForward();
+	void PressedSprint();
+	void ReleasedSprint();
+	void OnSprint();
+	void OffSprint();
 
 private:
 	void OnEvade();
@@ -99,6 +103,8 @@ private:
 	void OnAutoFire();
 	void OnReload();
 
+	void OnInteract();
+
 public:
 	class ACAttachment* GetAttachment();
 	class ACDoAction* GetDoAction();
@@ -109,10 +115,14 @@ public:
 	void SetCurrentAmmo(int Amount);
 	int32 GetCurrentAmmo();
 
-	virtual void UpdateAmmo(uint32 CurrentAmmo) override;
-	
+	void UpdateAmmo(uint32 CurrentAmmo);
+
+private:
+	void AmmoSelect();
+
 public:
 	bool GetRightClick() { return bRightClick; }
+	bool GetSprintMode() { return bSprintMode; }
 
 public:
 	virtual void GetAimRay(FVector& OutAimStart, FVector& OutAimEnd, FVector& OutAimDirection, float SpreadSize) override;
@@ -133,12 +143,29 @@ private:
 		void OnStateTypeChanged(EStateType InPrevType, EStateType InNewType);
 
 private:
+	UPROPERTY()
+		class UCItem* SelectAmmo;
+
+	TArray<FHitResult> hitResults;
+
 	class UMaterialInstanceDynamic* BodyMaterial;
 	class UMaterialInstanceDynamic* LogoMaterial;
 
 	class UCUserWidget_Ammo* WidgetAmmo;
-	class UCItem* SelectAmmo;
+
 
 	bool bRightClick;
+	bool bSprintMode;
+	bool bPushForward;
+	bool bPushSprint;
+
 	float SpreadAim;
+
+	//Temp
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TSoftObjectPtr<class ACItemSpawner> ItemSpawner;
+
+	void TestButton();
+	//Temp
 };

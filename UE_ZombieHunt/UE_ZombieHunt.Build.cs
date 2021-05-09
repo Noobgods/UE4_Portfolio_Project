@@ -12,7 +12,8 @@ public class UE_ZombieHunt : ModuleRules
 			"Engine",
 			"InputCore",
 			"AIModule",
-			"GameplayTags"
+			"GameplayTags",
+			"GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
