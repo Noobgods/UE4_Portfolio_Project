@@ -9,7 +9,7 @@
 # 개발 영상
 > 2021.05.07 업데이트
 >
-> [![2021.05.07 개발 영상](http://img.youtube.com/vi/NnhALZ2ijoc/0.jpg)](https://youtu.be/NnhALZ2ijoc?t=0s)
+> [![2021.05.07 개발 영상](http://img.youtube.com/vi/PDIeuZGZOV0/0.jpg)](https://www.youtube.com/watch?v=PDIeuZGZOV0)
 >
    
     
