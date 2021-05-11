@@ -10,9 +10,9 @@
    
 # 개발 영상
 > 2021.05.09 업데이트
->
+> [![2021.05.11 개발 영상](http://img.youtube.com/vi/S9OkDscNSng/0.jpg)](https://www.youtube.com/watch?v=S9OkDscNSng)
 > [![2021.05.09 개발 영상](http://img.youtube.com/vi/PDIeuZGZOV0/0.jpg)](https://www.youtube.com/watch?v=PDIeuZGZOV0)
->
+> 
    
 ----------------------------------------
     
@@ -31,12 +31,19 @@
 > ## Components
 >
 > * Action Component
-> * Behavior Component
+> + 캐릭터의 행동을 관리
+> * Behavior Component 
+> + 적의 상태와 Behavior Tree 관리
 > * Inventory Component : ItemContainer
+> + 캐릭터의 아이템 관리 
 > * Montage Component
-> * Option Component
+> + 캐릭터의 Montage들을 정보를 관리하고 Play
 > * State Component
+> + 캐릭터의 상태 관리
 > * Status Component
+> + 캐릭터의 스테이터스 관리
+> * Option Component
+> + 기타 조작옵션 관리
    
 ----------------------------------------
    
@@ -45,7 +52,7 @@
 >> ### ActionData : DataAsset
 >> + Action에 대한 정보를 관리하는 데이터 에셋
 >> + 기능 : Action Object 생성과 Actor들을 스폰
->>   (저장된 Data에서 만들어진 Action을 ItemData로 보내는 함수를 만들면 무기들을 Item화 가능)
+>>   (저장된 Data에서 만들어진 Action을 ItemData로 보내는 함수를 만들면 무기들을 Item화 가능 -> 구현 예정)
 > 
 >> ### Action : UObject 
 >> + Attachment (캐릭터에 Attach되는 무기 액터 정보, 콜리전 정보)
@@ -79,3 +86,16 @@
 >> ### ItemSpawner : AActor, ItemContainer
 >> + 맵에 배치된 아이템을 가지고 있는 액터 클래스
 >> + 기능 : ItemContainer로 아이템 전송, Location에 아이템 스폰
+> 
+>> ### EnemySpawner : AActor (구현 예정)
+>> + 적을 스폰하는 기능을 가지고 있는 액터 클래스
+>> + 기능 : 적 관리, 적 스폰
+
+ * 추가할 내용
+ - Enemy 구조, Action 플로우 차트
+ * 개발할 내용(우선순위 순으로)
+ - 인벤토리 UI
+ - 장비 아이템화
+ - 적 AI
+ - 적 추가
+ - 컨텐츠 추가
