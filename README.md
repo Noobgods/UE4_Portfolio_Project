@@ -33,19 +33,19 @@
 > ## Components
 >
 > * Action Component
-> + 캐릭터의 행동을 관리
+>  - 캐릭터의 행동을 관리
 > * Behavior Component 
-> + 적의 상태와 Behavior Tree 관리
+>  - 적의 상태와 Behavior Tree 관리
 > * Inventory Component : ItemContainer
-> + 캐릭터의 아이템 관리 
+>  - 캐릭터의 아이템 관리 
 > * Montage Component
-> + 캐릭터의 Montage들을 정보를 관리하고 Play
+>  - 캐릭터의 Montage들을 정보를 관리하고 Play
 > * State Component
-> + 캐릭터의 상태 관리
+>  - 캐릭터의 상태 관리
 > * Status Component
-> + 캐릭터의 스테이터스 관리
+>  - 캐릭터의 스테이터스 관리
 > * Option Component
-> + 기타 조작옵션 관리
+>  - 기타 조작옵션 관리
    
 ----------------------------------------
    
