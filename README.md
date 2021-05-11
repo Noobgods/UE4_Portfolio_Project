@@ -33,19 +33,25 @@
 > ## Components
 >
 > * Action Component
->  - 캐릭터의 행동을 관리
+>   - 캐릭터의 행동을 관리
+>   
 > * Behavior Component 
->  - 적의 상태와 Behavior Tree 관리
+>   - 적의 상태와 Behavior Tree 관리
+>   
 > * Inventory Component : ItemContainer
->  - 캐릭터의 아이템 관리 
+>   - 캐릭터의 아이템 관리 
+>   
 > * Montage Component
->  - 캐릭터의 Montage들을 정보를 관리하고 Play
+>   - 캐릭터의 Montage들을 정보를 관리하고 Play
+>   
 > * State Component
->  - 캐릭터의 상태 관리
+>   - 캐릭터의 상태 관리
+>   
 > * Status Component
->  - 캐릭터의 스테이터스 관리
+>   - 캐릭터의 스테이터스 관리
+>   
 > * Option Component
->  - 기타 조작옵션 관리
+>   - 기타 조작옵션 관리
    
 ----------------------------------------
    
@@ -94,10 +100,10 @@
 >> + 기능 : 적 관리, 적 스폰
 
  * 추가할 내용
- - Enemy 구조, Action 플로우 차트
+    - Enemy 구조, Action 플로우 차트
  * 개발할 내용(우선순위 순으로)
- - 인벤토리 UI
- - 장비 아이템화
- - 적 AI
- - 적 추가
- - 컨텐츠 추가
+    - 인벤토리 UI
+    - 장비 아이템화
+    - 적 AI
+    - 적 추가
+    - 컨텐츠 추가
