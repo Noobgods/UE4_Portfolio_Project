@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "Components/CStateComponent.h"
 #include "Components/CStatusComponent.h"
+#include "Sound/SoundCue.h"
 
 void ACDoAction_Melee::DoAction()
 {
@@ -18,6 +19,12 @@ void ACDoAction_Melee::DoAction()
 
 	CheckFalse(State->IsIdleMode());
 	State->SetActionMode();
+
+	//Attack Sound
+	USoundCue* attackSound = Datas[Index].AttackSoundCue;
+	if (!!attackSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), attackSound, OwnerCharacter->GetActorLocation());
+	}
 
 	OwnerCharacter->PlayAnimMontage(Datas[0].AnimMontage, Datas[0].PlayRatio, Datas[0].StartSection);
 	Datas[0].bCanMove ? Status->SetMove() : Status->SetStop();
@@ -55,6 +62,8 @@ void ACDoAction_Melee::OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* 
 {
 	Super::OnAttachmentBeginOverlap(InAttacker, InAttackerCauser, InOtherCharacter);
 
+	CheckNull(InOtherCharacter);
+
 	//Block Multi Hitting
 	for (const ACharacter* other : HittedCharacter) {
 		if (other == InOtherCharacter) {
@@ -77,7 +86,7 @@ void ACDoAction_Melee::OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* 
 		transform.AddToTranslation(InOtherCharacter->GetActorLocation());
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, transform);
 	}
-
+	
 	TSubclassOf<UCameraShake> shake = Datas[Index].ShakeClass;
 	if (!!shake) {
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->PlayerCameraManager->PlayCameraShake(shake);

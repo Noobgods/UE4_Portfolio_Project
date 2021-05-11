@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "CAIController.generated.h"
 
 UCLASS()
@@ -42,4 +43,5 @@ private:
 private:
 	class ACEnemy_AI* OwnerEnemy;
 	class UAISenseConfig_Sight* Sight;
+	class UAISenseConfig_Hearing* Hearing;
 };

@@ -14,7 +14,7 @@ private:
 		class UBehaviorTree* BehaviorTree;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ai")
-		uint8 TeamID = 1;
+		uint8 TeamID = 2;
 
 public:
 	FORCEINLINE class UBehaviorTree* GetBehaviorTree() { return BehaviorTree; }

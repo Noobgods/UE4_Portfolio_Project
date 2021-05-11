@@ -43,6 +43,9 @@ public:
 		class UParticleSystem* Effect;
 
 	UPROPERTY(EditAnywhere)
+		class USoundCue* AttackSoundCue;
+
+	UPROPERTY(EditAnywhere)
 		FTransform EffectTransform;
 
 	UPROPERTY(EditAnywhere)

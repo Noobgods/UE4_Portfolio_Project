@@ -2,6 +2,26 @@
 
 UCStatusComponent::UCStatusComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCStatusComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Health = MaxHealth;
+	Stamina = MaxStamina;
+}
+
+void UCStatusComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	CurrentStaminaRegenTime += DeltaTime;
+
+	if (CurrentStaminaRegenTime >= StaminaRegenTime && MaxStamina > Stamina) {
+		Stamina += StaminaRegen;
+	}
 }
 void UCStatusComponent::AddHealth(float InAmount)
 {
@@ -25,13 +45,6 @@ void UCStatusComponent::SubStamina(float InAmount)
 {
 	Stamina -= InAmount;
 	Stamina = FMath::Clamp(Stamina, 0.0f, MaxStamina);
-}
-
-void UCStatusComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	Health = MaxHealth;
 }
 
 void UCStatusComponent::SetMove()

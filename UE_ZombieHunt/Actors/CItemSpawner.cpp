@@ -13,7 +13,7 @@ void ACItemSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FVector location(50.0f, 730.0, 110.0f);
+	FVector location(1300.0f, 250.0, 110.0f);
 	FRotator rotator(0, 0, 0);
 	UCItem* item = ItemDatas->SpawnItemsByName(this, TEXT("RifleAmmo"), location, rotator);
 	if (!!item) {
@@ -22,7 +22,7 @@ void ACItemSpawner::BeginPlay()
 	}
 	item = nullptr;
 
-	location = FVector(-180.0f, 730.0, 110.0f);
+	location = FVector(1300.0f, -250.0, 60.0f);
 	rotator = FRotator(0, 0, 0);
 	item = ItemDatas->SpawnItemsByName(this, TEXT("ShotgunAmmo"), location, rotator);
 	if (!!item) {
@@ -67,7 +67,7 @@ void ACItemSpawner::AddItem(UCItem* Item)
 {
 }
 
-void ACItemSpawner::SpawnItem(FString ItemName, FVector Location, FRotator Rotator, uint32 Quantity = 1)
+void ACItemSpawner::SpawnItem(FString ItemName, FVector Location, FRotator Rotator, int32 Quantity = 1)
 {
 	UCItem* item = ItemDatas->SpawnItemsByName(this, ItemName, Location, Rotator);
 	if (!!item) {

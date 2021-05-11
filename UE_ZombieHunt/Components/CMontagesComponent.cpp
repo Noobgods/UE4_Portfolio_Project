@@ -45,6 +45,12 @@ void UCMontagesComponent::PlayDead()
 	PlayAnimMontage(EStateType::Dead);
 }
 
+void UCMontagesComponent::StopMontages()
+{
+	ACharacter* character = Cast<ACharacter>(GetOwner());
+	character->StopAnimMontage();
+}
+
 void UCMontagesComponent::PlayAnimMontage(EStateType InStateType)
 {
 	ACharacter* character = Cast<ACharacter>(GetOwner());

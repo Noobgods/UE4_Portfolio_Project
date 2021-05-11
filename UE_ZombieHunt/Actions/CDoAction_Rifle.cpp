@@ -13,6 +13,7 @@
 #include "Components/DecalComponent.h"
 #include "Sound/SoundCue.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Perception/AISense_Hearing.h"
 
 ACDoAction_Rifle::ACDoAction_Rifle()
 {
@@ -252,6 +253,7 @@ void ACDoAction_Rifle::Firing()
 	UGameplayStatics::SpawnEmitterAttached(FlashParticle, Mesh, "MuzzleFlash", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset);
 	UGameplayStatics::SpawnEmitterAttached(EjectParticle, Mesh, "EjectBullet", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSoundCue, muzzleLocation);
+	UAISense_Hearing::ReportNoiseEvent(GetWorld(), muzzleLocation, 1.0f, OwnerCharacter, 10000.0f, "Firing_Sound");
 
 	Pitch -= LimitPitch * GetWorld()->GetDeltaSeconds();
 	if (Pitch > -LimitPitch) {
@@ -292,7 +294,7 @@ void ACDoAction_Rifle::Firing()
 				
 				if (meshComp->IsSimulatingPhysics()) {
 					direction[i].Normalize();
-					meshComp->AddImpulseAtLocation(direction[i] * Datas[0].Power * 3.0f, OwnerCharacter->GetActorLocation());
+					meshComp->AddImpulseAtLocation((direction[i] * Datas[0].Power * 1000.0f), OwnerCharacter->GetActorLocation());
 				}
 			}
 			else {

@@ -44,7 +44,7 @@ public:
 	void PlayBackStep();
 	void PlayHitted();
 	void PlayDead();
-
+	void StopMontages();
 
 protected:
 	virtual void BeginPlay() override;

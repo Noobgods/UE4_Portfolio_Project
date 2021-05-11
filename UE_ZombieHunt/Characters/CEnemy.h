@@ -25,11 +25,16 @@ private: //Actor Component
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCMontagesComponent* Montages;
 
-	UPROPERTY(VisibleDefaultsOnly)
+protected:
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly)
 		class UCActionComponent* Action;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TSoftObjectPtr<class ACItemSpawner> ItemSpawner;
 
 public:
 	ACEnemy();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,20 +61,11 @@ private:
 private:
 	UFUNCTION()
 		void OnStateTypeChanged(EStateType InPrevType, EStateType InNewType);
+	
+	//void DropRandomAmmo();
 
-/*
-private:
-	UFUNCTION()
-		void ResetColor();
-
-public:
-	virtual void ChangeColor(FLinearColor InColor) override;
-
-private:
-	class UMaterialInstanceDynamic* BodyMaterial;
-	class UMaterialInstanceDynamic* LogoMaterial;
-*/
 private:
 	class AController* DamageInstigator;
 	float DamageValue;
+
 };

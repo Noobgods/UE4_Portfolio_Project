@@ -5,6 +5,8 @@
 #include "Characters/CPlayer.h"
 #include "Components/CBehaviorComponent.h"
 
+#include "BeHaviorTree/BlackboardComponent.h"
+
 UCBTService_Melee::UCBTService_Melee()
 {
 	NodeName = "Melee";
@@ -47,7 +49,7 @@ void UCBTService_Melee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	}
 
 	//In Sight Range
-	if (distance < controller->GetSightRadius()) {
+	if (!!controller->GetBlackboardComponent()->GetValueAsObject("Player")) {
 		behavior->SetApproachMode();
 		return;
 	}

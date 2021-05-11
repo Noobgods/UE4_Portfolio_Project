@@ -25,14 +25,15 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Item")
 		virtual void MoveItem(UObject* Container, class UCItem* Item) override;
-	
-	UFUNCTION()
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
 		virtual void AddItem(class UCItem* Item) override;
 
 public:
-	void SpawnItem(FString ItemName, FVector Location, FRotator Rotator, uint32 Quantity);
+	UFUNCTION(BlueprintCallable, Category = "Item")
+		void SpawnItem(FString ItemName, FVector Location, FRotator Rotator, int32 Quantity);
 
 private:
 	UPROPERTY()

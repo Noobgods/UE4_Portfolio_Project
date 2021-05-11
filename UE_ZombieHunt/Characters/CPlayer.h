@@ -14,11 +14,18 @@ class UE_ZOMBIEHUNT_API ACPlayer : public ACharacter, public IICharacter, public
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-		uint8 TeamID = 0;
+		uint8 TeamID = 1;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 		TSubclassOf<class UCUserWidget_Ammo> WidgetAmmoClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+		TSubclassOf<class UCUserWidget_StatusBar> StatusBarClass;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+		class USoundCue* HitSound;
 
 private: //Scene Component
 	UPROPERTY(VisibleDefaultsOnly)
@@ -108,7 +115,12 @@ private:
 public:
 	class ACAttachment* GetAttachment();
 	class ACDoAction* GetDoAction();
-	class UCActionComponent* GetActionComponent();
+
+	UFUNCTION(BlueprintCallable)
+		class UCActionComponent* GetActionComponent();
+
+	UFUNCTION(BlueprintCallable)
+		class UCStatusComponent* GetStatusComponent();
 	
 public:
 	void AddCurrentAmmo(int Amount);
@@ -132,11 +144,11 @@ public:
 	virtual void OffFocus() override;
 
 public:
-	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) { return 0; };
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 private:
-	virtual void Hitted() override {};
-	virtual void Dead() override {};
+	virtual void Hitted() override;
+	virtual void Dead() override;
 
 private:
 	UFUNCTION()
@@ -152,7 +164,7 @@ private:
 	class UMaterialInstanceDynamic* LogoMaterial;
 
 	class UCUserWidget_Ammo* WidgetAmmo;
-
+	class UCUserWidget_StatusBar* WidgetStatus;
 
 	bool bRightClick;
 	bool bSprintMode;
@@ -160,6 +172,7 @@ private:
 	bool bPushSprint;
 
 	float SpreadAim;
+	float DamageValue;
 
 	//Temp
 public:

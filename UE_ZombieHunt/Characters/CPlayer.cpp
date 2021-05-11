@@ -9,12 +9,15 @@
 #include "Components/CInventoryComponent.h"
 #include "Items/CItem.h"
 #include "Widgets/CUserWidget_Ammo.h"
+#include "Widgets/CUserWidget_StatusBar.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Components/CapsuleComponent.h"
+#include "Sound/SoundCue.h"
 
 //Temp
 #include "Actors/CItemSpawner.h"
@@ -41,6 +44,12 @@ ACPlayer::ACPlayer()
 	CHelpers::CreateActorComponent(this, &Inventory, "Inventory");
 
 	//-----------------------------------------------------------------------------
+	// Widgets Settings
+	//-----------------------------------------------------------------------------
+	CHelpers::GetClass<UCUserWidget_Ammo>(&WidgetAmmoClass, "WidgetBlueprint'/Game/ActionGame/Widgets/BP_CUserWidget_Ammo.BP_CUserWidget_Ammo_C'");
+	CHelpers::GetClass<UCUserWidget_StatusBar>(&StatusBarClass, "WidgetBlueprint'/Game/ActionGame/Widgets/BP_CUserWidget_StatusBar.BP_CUserWidget_StatusBar_C'");
+
+	//-----------------------------------------------------------------------------
 	// Comp Settings
 	//-----------------------------------------------------------------------------
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -88));
@@ -53,9 +62,7 @@ ACPlayer::ACPlayer()
 	TSubclassOf<UAnimInstance> animInstance;
 	CHelpers::GetClass<UAnimInstance>(&animInstance, "AnimBlueprint'/Game/ActionGame/Player/ABP_CPlayer.ABP_CPlayer_C'");
 	GetMesh()->SetAnimInstanceClass(animInstance);
-
-	CHelpers::GetClass<UCUserWidget_Ammo>(&WidgetAmmoClass, "WidgetBlueprint'/Game/ActionGame/Widgets/BP_CUserWidget_Ammo.BP_CUserWidget_Ammo_C'");
-
+	
 	SpringArm->SetRelativeLocation(FVector(0, 0, 150));
 	SpringArm->SetRelativeRotation(FRotator(0, 90, 0));
 	SpringArm->SocketOffset = FVector(0, 70, 30);
@@ -68,32 +75,26 @@ ACPlayer::ACPlayer()
 	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 }
 
 void ACPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*
-	UMaterialInstanceConstant* body;
-	UMaterialInstanceConstant* logo;
-
-	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&body, "MaterialInstanceConstant'/Game/Materials/MI_Player_Body.MI_Player_Body'");
-	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&logo, "MaterialInstanceConstant'/Game/Materials/MI_Player_Logo.MI_Player_Logo'");
-
-	BodyMaterial = UMaterialInstanceDynamic::Create(body, this);
-	LogoMaterial = UMaterialInstanceDynamic::Create(logo, this);
-
-	GetMesh()->SetMaterial(0, BodyMaterial);
-	GetMesh()->SetMaterial(1, LogoMaterial);
-	*/
-
 	State->OnStateTypeChanged.AddDynamic(this, &ACPlayer::OnStateTypeChanged);
 
 	WidgetAmmo = CreateWidget<UCUserWidget_Ammo, APlayerController>(GetController<APlayerController>(), WidgetAmmoClass);
 	WidgetAmmo->AddToViewport();
 	WidgetAmmo->SetVisibility(ESlateVisibility::Hidden);
-	
+
+	WidgetStatus = CreateWidget<UCUserWidget_StatusBar, APlayerController>(GetController<APlayerController>(), StatusBarClass);
+	WidgetStatus->AddToViewport();
+	WidgetStatus->SetVisibility(ESlateVisibility::Visible);
+	WidgetStatus->UpdateHealth(Status->GetHealth(), Status->GetMaxHealth());
+	WidgetStatus->UpdateStamina(Status->GetStamina(), Status->GetMaxStamina());
+
+	SetGenericTeamId(TeamID);
 	//Temp
 	//Inventory->GetInitItems();
 	//Temp
@@ -113,6 +114,9 @@ void ACPlayer::Tick(float DeltaTime)
 	TArray<AActor*> ignore;
 	ignore.Add(this);
 	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), start, end, 100.0f, type, true, ignore, EDrawDebugTrace::None, hitResults, true);
+
+	WidgetStatus->UpdateHealth(Status->GetHealth(), Status->GetMaxHealth());
+	WidgetStatus->UpdateStamina(Status->GetStamina(), Status->GetStamina());
 
 }
 
@@ -283,6 +287,7 @@ void ACPlayer::OnFist()
 {
 	if (bRightClick) return;
 	if (bSprintMode) OffSprint();
+	CheckFalse(State->IsIdleMode());
 
 	// ³ªÁß¿¡ Fist À§Á¬ µé¾î¿È
 	if (Action->SetFistMode()) {
@@ -383,16 +388,24 @@ void ACPlayer::OnInteract()
 }
 
 
-ACAttachment* ACPlayer::GetAttachment() {
+ACAttachment* ACPlayer::GetAttachment() 
+{
 	return Action->GetCurrent()->GetAttachment();
 }
 
-ACDoAction* ACPlayer::GetDoAction() {
+ACDoAction* ACPlayer::GetDoAction() 
+{
 	return Action->GetCurrent()->GetDoAction();
 }
 
-UCActionComponent* ACPlayer::GetActionComponent() {
+UCActionComponent* ACPlayer::GetActionComponent() 
+{
 	return Action;
+}
+
+UCStatusComponent* ACPlayer::GetStatusComponent()
+{
+	return Status;
 }
 
 void ACPlayer::AddCurrentAmmo(int Amount)
@@ -478,6 +491,8 @@ void ACPlayer::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 	switch (InNewType) {
 	case EStateType::BackStep: Begin_BackStep(); break;
 	case EStateType::Roll: Begin_Roll(); break;
+	case EStateType::Hitted: Hitted(); break;
+	case EStateType::Dead: Dead(); break;
 	}
 }
 
@@ -489,6 +504,61 @@ void ACPlayer::OnFocus()
 void ACPlayer::OffFocus()
 {
 	//CrossHair->OffFocus();
+}
+
+float ACPlayer::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	DamageValue = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID)) {
+		const FPointDamageEvent* pointDamageEvent = (FPointDamageEvent*)&DamageEvent;
+
+		FName boneName = pointDamageEvent->HitInfo.BoneName;
+		if (!boneName.Compare(FName(TEXT("Head")))) {
+			DamageValue = DamageValue * 100.0f;
+		}
+	}
+
+	State->SetHittedMode();
+	return Status->GetHealth();
+}
+
+void ACPlayer::Hitted()
+{
+	Status->SubHealth(DamageValue);
+	DamageValue = 0.0f;
+
+	if (Status->GetHealth() <= 0.0f) {
+		State->SetDeadMode();
+		return;
+	}
+
+	if (!!HitSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+	}
+
+	//Play Hit Montage
+	if (Action->IsRifleMode() || Action->IsShotgunMode()) {
+		Montages->PlayDead();
+	}
+	else {
+		Montages->PlayHitted();
+	}
+}
+
+void ACPlayer::Dead()
+{
+	CheckFalse(State->IsDeadMode());
+	//Montages->PlayDead();
+
+	Action->OffAllCollisions();
+	
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	Montages->StopMontages();
+
 }
 
 //Temp

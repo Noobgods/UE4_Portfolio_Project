@@ -22,16 +22,22 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 		float MaxStamina = 100.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Stats")
+		float StaminaRegen = 10.0f;
+
 private: //Scene Component
 	UPROPERTY(EditAnywhere, Category = "Speed")
 		float Speed[(int32)ECharacterSpeed::Max] = { 200, 400, 600 };
 
-
 public:
-	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
-	FORCEINLINE float GetHealth() { return Health; }
-	FORCEINLINE float GetMaxStamina() { return MaxStamina; }
-	FORCEINLINE float GetStamina() { return Stamina; }
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE float GetMaxHealth() { return MaxHealth; }
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE float GetHealth() { return Health; }
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE float GetMaxStamina() { return MaxStamina; }
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE float GetStamina() { return Stamina; }
 
 	FORCEINLINE float GetWalkSpeed() { return Speed[(int32)ECharacterSpeed::Walk]; }
 	FORCEINLINE float GetRunSpeed() { return Speed[(int32)ECharacterSpeed::Run]; }
@@ -55,10 +61,15 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 private:
 	float Health;
 	float Stamina;
 	bool bCanMove = true;
+
+	float StaminaRegenTime = 1.0f;
+	float CurrentStaminaRegenTime = 0;
+
 		
 };

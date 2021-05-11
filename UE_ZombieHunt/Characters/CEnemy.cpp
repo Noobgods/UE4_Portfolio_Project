@@ -7,6 +7,7 @@
 #include "Components/CActionComponent.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CMontagesComponent.h"
+#include "Actors/CItemSpawner.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -44,24 +45,9 @@ ACEnemy::ACEnemy()
 
 void ACEnemy::BeginPlay()
 {
-	/*
-	UMaterialInstanceConstant* body;
-	UMaterialInstanceConstant* logo;
-
-	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&body, "MaterialInstanceConstant'/Game/ActionGame/Materials/MI_Enemy_Body.MI_Enemy_Body'");
-	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&logo, "MaterialInstanceConstant'/Game/ActionGame/Materials/MI_Enemy_Logo.MI_Enemy_Logo'");
-
-	BodyMaterial = UMaterialInstanceDynamic::Create(body, this);
-	LogoMaterial = UMaterialInstanceDynamic::Create(logo, this);
-
-	GetMesh()->SetMaterial(0, BodyMaterial);
-	GetMesh()->SetMaterial(1, LogoMaterial);
-	*/
 	State->OnStateTypeChanged.AddDynamic(this, &ACEnemy::OnStateTypeChanged);
 
 	Super::BeginPlay();
-	
-	//Action->SetUnarmedMode();
 
 }
 
@@ -92,7 +78,7 @@ float ACEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AContro
 
 		FName boneName = pointDamageEvent->HitInfo.BoneName;
 		if (!boneName.Compare(FName(TEXT("Head")))) {
-			DamageValue = DamageValue * 100.0f;
+			DamageValue = DamageValue * 5.0f;
 		}
 	}
 
@@ -112,7 +98,6 @@ void ACEnemy::Hitted()
 
 	//Play Hit Montage
 	Montages->PlayHitted();
-	//ChangeColor(FLinearColor::Red);
 
 	//Launch Enemy
 	FVector start = GetActorLocation();
@@ -125,11 +110,6 @@ void ACEnemy::Hitted()
 	direction.Normalize();
 	LaunchCharacter(-direction * LaunchValue, true, false);
 
-	//Change Logo Material
-	/*
-	ChangeColor(FLinearColor::Green);
-	UKismetSystemLibrary::K2_SetTimer(this, "ResetColor", 1.0f, false);
-	*/
 }
 
 void ACEnemy::Dead()
@@ -143,22 +123,10 @@ void ACEnemy::Dead()
 	GetCharacterMovement()->DisableMovement();
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	Montages->StopMontages();
 
+	//DropRandomAmmo();
 }
-
-/*
-void ACEnemy::ChangeColor(FLinearColor InColor)
-{
-	InColor *= 35.0f;
-	LogoMaterial->SetVectorParameterValue("LogoLight", InColor);
-	LogoMaterial->SetScalarParameterValue("UseLight", State->IsHittedMode() ? 1 : 0);
-}
-
-void ACEnemy::ResetColor() {
-	FLinearColor color = Action->GetCurrent()->GetEquipmentColor();
-	ChangeColor(color);
-}
-*/
 
 void ACEnemy::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 {
@@ -167,3 +135,19 @@ void ACEnemy::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 	case EStateType::Dead: Dead(); break;
 	}
 }
+
+/* Drop Ammo
+void ACEnemy::DropRandomAmmo()
+{
+	if (FMath::RandRange(0.0f, 10.0f) <= 1.0f) {
+		FVector location = GetActorLocation();
+		FRotator rotator;
+		if (FMath::RandRange(0.0f, 2.0f) >= 1.0f) {
+			ItemSpawner->SpawnItem(TEXT("RifleAmmo"), location, rotator, (uint32)(FMath::RandRange(20.0f, 30.0f)));
+		}
+		else {
+			ItemSpawner->SpawnItem(TEXT("ShotgunAmmo"), location, rotator, (uint32)(FMath::RandRange(10.0f, 20.0f)));
+		}
+	}
+}
+*/

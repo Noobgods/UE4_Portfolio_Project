@@ -28,7 +28,6 @@ void ACItemActor::Pick(AActor* InActor)
 	if (!!GetOwner()) {
 		ACPlayer* player = Cast<ACPlayer>(GetOwner());
 		if (!!player && !!Mesh) {
-			CLog::Print("Pick Item ::: " + this->GetName());
 			Mesh->SetHiddenInGame(true);
 			Mesh->SetSimulatePhysics(false);
 			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);

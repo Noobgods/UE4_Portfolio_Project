@@ -50,11 +50,20 @@ public:
 public:	
 	UCActionComponent();
 
-	void SetUnarmedMode();
-	bool SetFistMode();
-	bool SetOneHandMode();
-	bool SetRifleMode();
-	bool SetShotgunMode();
+	UFUNCTION(BlueprintCallable)
+		void SetUnarmedMode();
+
+	UFUNCTION(BlueprintCallable)
+		bool SetFistMode();
+
+	UFUNCTION(BlueprintCallable)
+		bool SetOneHandMode();
+
+	UFUNCTION(BlueprintCallable)
+		bool SetRifleMode();
+
+	UFUNCTION(BlueprintCallable)
+		bool SetShotgunMode();
 
 	void OffAllCollisions();
 
