@@ -11,9 +11,6 @@
 > 2021.05.11 업데이트
 > [![2021.05.11 개발 영상](http://img.youtube.com/vi/S9OkDscNSng/0.jpg)](https://www.youtube.com/watch?v=S9OkDscNSng)
 > 
-> 2021.05.09 업데이트
-> [![2021.05.09 개발 영상](http://img.youtube.com/vi/PDIeuZGZOV0/0.jpg)](https://www.youtube.com/watch?v=PDIeuZGZOV0)
-> 
    
 ----------------------------------------
     
